@@ -1,10 +1,10 @@
 # Waywork
 
-A framework for building sophisticated waywall configurations for Minecraft speedrunning setups on Linux/Wayland.
+A framework for building waywall configurations for Minecraft speedrunning setups on Linux/Wayland.
 
 ## Overview
 
-Waywork provides a structured, modular approach to managing complex waywall configurations. It abstracts common patterns like resolution switching, scene management, and process orchestration into reusable components, making waywall configs more maintainable and easier to understand.
+Waywork provides a structured, modular approach to managing waywall configurations. It abstracts common patterns like resolution switching, scene management, and process orchestration into reusable components, making waywall configs more maintainable and easier to understand.
 
 ## Components
 
@@ -30,14 +30,14 @@ scene:register("e_counter", {
         src = { x = 1, y = 37, w = 49, h = 9 }, 
         dst = { x = 1150, y = 300, w = 196, h = 36 } 
     },
-    groups = { "thin", "e_counter" },
+    groups = { "thin" },
 })
 
 scene:register("eye_overlay", {
     kind = "image",
     path = "/path/to/overlay.png",
     options = { dst = { x = 30, y = 340, w = 700, h = 400 } },
-    groups = { "tall", "tall_eye" },
+    groups = { "tall" },
 })
 
 -- Enable/disable by group
@@ -55,7 +55,7 @@ Orchestrates resolution switching with enter/exit hooks and guard conditions.
 **Features:**
 - **Resolution Management**: Automatic resolution switching with cleanup
 - **Lifecycle Hooks**: `on_enter` and `on_exit` callbacks for mode transitions
-- **Toggle Guards**: Conditional guards to prevent accidental mode switches
+- **Toggle Guards**: Conditional guards to prevent accidental mode switches (e.g. pressing F3 + F4 to switch gamemode, but accidentally triggering mode transition instead)
 - **State Tracking**: Knows which mode is currently active
 
 **Example:**
@@ -129,24 +129,36 @@ Low-level utilities used throughout the framework.
 
 ### Process Management (`processes.lua`)
 
-Utilities for managing external Java processes (commonly used for speedrunning tools).
+Utilities for managing external processes with shell command handling.
+
+**Features:**
+- **Process Detection**: Check if processes are running using `pgrep`
+- **Java JAR Support**: Specialized utilities for launching Java applications
+- **Argument Handling**: Proper handling of command arguments as arrays
 
 **Example:**
 ```lua
 local P = require("waywork.processes")
 
+-- Check if a process is running
+if P.is_running("firefox") then
+    print("Firefox is running")
+end
+
+-- Create Java JAR launchers with proper argument handling
 local ensure_paceman = P.ensure_java_jar(
     ww, 
     "/usr/lib/jvm/java-24-openjdk/bin/java",
     "/home/user/apps/paceman-tracker.jar",
-    "--nogui"
-)("paceman-tracker\\.jar")
+    {"--nogui"}  -- arguments as array
+)("paceman-tracker\\.jar*")  -- process pattern to check
 
 local ensure_ninjabrain = P.ensure_java_jar(
     ww,
     "/usr/lib/jvm/java-24-openjdk/bin/java", 
-    "/home/user/apps/ninjabrain-bot.jar"
-)("ninjabrain-bot\\.jar")
+    "/home/user/apps/ninjabrain-bot.jar",
+    {"-Dawt.useSystemAAFontSettings=on"}  -- JVM arguments
+)("ninjabrain-bot\\.jar")  -- process pattern to check
 
 -- Use in key bindings
 ["Ctrl-Shift-P"] = function()
@@ -231,7 +243,3 @@ local actions = Keys.actions({
 4. **Reusability**: Common patterns abstracted into reusable components
 5. **Error Prevention**: Toggle guards and proper state management prevent common issues
 6. **Cleaner Code**: Focus on what you want to achieve, not how to implement it
-
-## License
-
-This project is licensed under the same terms as waywall.
