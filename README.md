@@ -1,0 +1,237 @@
+# Waywork
+
+A framework for building sophisticated waywall configurations for Minecraft speedrunning setups on Linux/Wayland.
+
+## Overview
+
+Waywork provides a structured, modular approach to managing complex waywall configurations. It abstracts common patterns like resolution switching, scene management, and process orchestration into reusable components, making waywall configs more maintainable and easier to understand.
+
+## Components
+
+### Scene Manager (`scene.lua`)
+
+Manages visual elements (mirrors, images, text) uniformly with grouping and lifecycle management.
+
+**Features:**
+- **Unified Management**: Handle mirrors, images, and text objects through a single interface
+- **Grouping**: Organize scene objects into logical groups for batch operations
+- **Lazy Loading**: Objects are only created when enabled
+- **Dynamic Updates**: Modify object properties at runtime
+
+**Example:**
+```lua
+local Scene = require("waywork.scene")
+local scene = Scene.SceneManager.new(ww)
+
+-- Register scene objects
+scene:register("e_counter", {
+    kind = "mirror",
+    options = { 
+        src = { x = 1, y = 37, w = 49, h = 9 }, 
+        dst = { x = 1150, y = 300, w = 196, h = 36 } 
+    },
+    groups = { "thin", "e_counter" },
+})
+
+scene:register("eye_overlay", {
+    kind = "image",
+    path = "/path/to/overlay.png",
+    options = { dst = { x = 30, y = 340, w = 700, h = 400 } },
+    groups = { "tall", "tall_eye" },
+})
+
+-- Enable/disable by group
+scene:enable_group("thin", true)   -- Enable all "thin" objects
+scene:enable_group("tall", false)  -- Disable all "tall" objects
+
+-- Enable/disable individual objects
+scene:enable("e_counter", true)
+```
+
+### Mode Manager (`modes.lua`)
+
+Orchestrates resolution switching with enter/exit hooks and guard conditions.
+
+**Features:**
+- **Resolution Management**: Automatic resolution switching with cleanup
+- **Lifecycle Hooks**: `on_enter` and `on_exit` callbacks for mode transitions
+- **Toggle Guards**: Conditional guards to prevent accidental mode switches
+- **State Tracking**: Knows which mode is currently active
+
+**Example:**
+```lua
+local Modes = require("waywork.modes")
+local ModeManager = Modes.ModeManager.new(ww)
+
+ModeManager:define("thin", {
+    width = 340,
+    height = 1080,
+    on_enter = function()
+        scene:enable_group("thin", true)
+    end,
+    on_exit = function()
+        scene:enable_group("thin", false)
+    end,
+})
+
+ModeManager:define("tall", {
+    width = 384,
+    height = 16384,
+    toggle_guard = function()
+        return not ww.get_key("F3")  -- Prevent toggle during F3 debug
+    end,
+    on_enter = function()
+        scene:enable_group("tall", true)
+        ww.set_sensitivity(tall_sens)
+    end,
+    on_exit = function()
+        scene:enable_group("tall", false)
+        ww.set_sensitivity(0)
+    end,
+})
+
+-- Toggle modes
+ModeManager:toggle("thin")  -- Switch to thin mode
+ModeManager:toggle("thin")  -- Switch back to default (0x0)
+```
+
+### Key Bindings (`keys.lua`)
+
+Simple utility for building action tables from key mappings.
+
+**Example:**
+```lua
+local Keys = require("waywork.keys")
+
+local actions = Keys.actions({
+    ["*-Alt_L"] = function()
+        return ModeManager:toggle("thin")
+    end,
+    ["*-F4"] = function()
+        return ModeManager:toggle("tall")
+    end,
+    ["Ctrl-E"] = function()
+        ww.press_key("ESC")
+    end,
+})
+
+config.actions = actions
+```
+
+### Core Utilities (`core.lua`)
+
+Low-level utilities used throughout the framework.
+
+**Features:**
+- **Toggle**: Boolean state management with callbacks
+- **Resettable Timeout**: Timeout that cancels previous invocations
+- **Table Operations**: Copy and merge utilities
+
+### Process Management (`processes.lua`)
+
+Utilities for managing external Java processes (commonly used for speedrunning tools).
+
+**Example:**
+```lua
+local P = require("waywork.processes")
+
+local ensure_paceman = P.ensure_java_jar(
+    ww, 
+    "/usr/lib/jvm/java-24-openjdk/bin/java",
+    "/home/user/apps/paceman-tracker.jar",
+    "--nogui"
+)("paceman-tracker\\.jar")
+
+local ensure_ninjabrain = P.ensure_java_jar(
+    ww,
+    "/usr/lib/jvm/java-24-openjdk/bin/java", 
+    "/home/user/apps/ninjabrain-bot.jar"
+)("ninjabrain-bot\\.jar")
+
+-- Use in key bindings
+["Ctrl-Shift-P"] = function()
+    ensure_ninjabrain() -- ensure Ninjabrain is running
+    ensure_paceman() -- ensure Paceman is running
+end,
+```
+
+## Migration from Legacy Config
+
+### Before (Legacy)
+```lua
+-- Scattered mirror management
+local make_mirror = function(options)
+    local this = nil
+    return function(enable)
+        if enable and not this then
+            this = waywall.mirror(options)
+        elseif this and not enable then
+            this:close()
+            this = nil
+        end
+    end
+end
+
+local mirrors = {
+    e_counter = make_mirror({ src = {...}, dst = {...} }),
+    thin_pie_all = make_mirror({ src = {...}, dst = {...} }),
+    -- ... dozens more
+}
+
+-- Manual resolution management
+local make_res = function(width, height, enable, disable)
+    return function()
+        local active_width, active_height = waywall.active_res()
+        if active_width == width and active_height == height then
+            waywall.set_resolution(0, 0)
+            disable()
+        else
+            waywall.set_resolution(width, height)
+            enable()
+        end
+    end
+end
+```
+
+### After (Waywork)
+```lua
+local Scene = require("waywork.scene")
+local Modes = require("waywork.modes")
+local Keys = require("waywork.keys")
+
+local scene = Scene.SceneManager.new(ww)
+local ModeManager = Modes.ModeManager.new(ww)
+
+-- Clean object registration
+scene:register("e_counter", {
+    kind = "mirror",
+    options = { src = {...}, dst = {...} },
+    groups = { "thin" },
+})
+
+-- Declarative mode definitions
+ModeManager:define("thin", {
+    width = 340,
+    height = 1080,
+    on_enter = function() scene:enable_group("thin", true) end,
+    on_exit = function() scene:enable_group("thin", false) end,
+})
+
+-- Simple key mappings
+local actions = Keys.actions({
+    ["*-Alt_L"] = function() return ModeManager:toggle("thin") end,
+})
+```
+
+## Benefits
+
+1. **Reduced Boilerplate**: Framework handles object lifecycle, resolution management, and state tracking
+2. **Better Organization**: Logical grouping of related functionality
+3. **Maintainability**: Clear separation of concerns and declarative configuration
+4. **Reusability**: Common patterns abstracted into reusable components
+5. **Error Prevention**: Toggle guards and proper state management prevent common issues
+6. **Cleaner Code**: Focus on what you want to achieve, not how to implement it
+
+## License
+
+This project is licensed under the same terms as waywall.
