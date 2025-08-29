@@ -45,6 +45,44 @@ function P.ww_exec_argv(ww, argv)
 	return ww.exec(cmd)
 end
 
+--- Return a function that starts an application when called.
+--- @param ww waywall waywall dependency
+--- @param app_path string path to the application executable
+--- @param args? string[] optional additional arguments to pass to the application
+--- @return fun(): nil
+function P.start_application(ww, app_path, args)
+	return function()
+		local argv = { app_path }
+		if args then
+			for _, a in ipairs(args) do
+				argv[#argv + 1] = a
+			end
+		end
+		P.ww_exec_argv(ww, argv)(ww, argv)
+	end
+end
+
+--- Ensure an application is running, start it if not.
+--- @param ww waywall waywall dependency
+--- @param app_path string path to the application executable
+--- @param args? string[] optional additional arguments to pass to the application
+--- @return fun(pattern: string): fun(): nil
+function P.ensure_application(ww, app_path, args)
+	return function(pattern)
+		return function()
+			if not P.is_running(pattern) then
+				local argv = { app_path }
+				if args then
+					for _, a in ipairs(args) do
+						argv[#argv + 1] = a
+					end
+				end
+				P.ww_exec_argv(ww, argv)
+			end
+		end
+	end
+end
+
 --- Ensure a Java JAR is running, start it if not.
 --- @param ww waywall
 --- @param java_path string path to java executable
@@ -55,13 +93,15 @@ function P.ensure_java_jar(ww, java_path, jar_path, args)
 	return function(pattern)
 		return function()
 			if not P.is_running(pattern) then
-				local argv = { java_path, "-jar", jar_path }
+				local argv = { java_path }
 				if args then
 					for _, a in ipairs(args) do
 						argv[#argv + 1] = a
 					end
 				end
-				P.ww_exec_argv(ww, argv)(ww, argv)
+				argv[#argv + 1] = "-jar"
+				argv[#argv + 1] = jar_path
+				P.ww_exec_argv(ww, argv)
 			end
 		end
 	end
