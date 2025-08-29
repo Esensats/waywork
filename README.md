@@ -6,6 +6,27 @@ A framework for building [waywall](https://github.com/tesselslate/waywall) confi
 
 Waywork provides a structured, modular approach to managing waywall configurations. It abstracts common patterns like resolution switching, scene management, and process orchestration into reusable components, making waywall configs more maintainable and easier to understand.
 
+## Table of Contents
+
+<!-- @import "[TOC]" {cmd="toc" depthFrom=2 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+- [Overview](#overview)
+- [Table of Contents](#table-of-contents)
+- [Components](#components)
+  - [Scene Manager (`scene.lua`)](#scene-manager-scenelua)
+  - [Mode Manager (`modes.lua`)](#mode-manager-modeslua)
+  - [Key Bindings (`keys.lua`)](#key-bindings-keyslua)
+  - [Core Utilities (`core.lua`)](#core-utilities-corelua)
+  - [Process Management (`processes.lua`)](#process-management-processeslua)
+- [Migration to Waywork](#migration-to-waywork)
+  - [Before](#before)
+  - [After (Waywork)](#after-waywork)
+- [Benefits](#benefits)
+
+<!-- /code_chunk_output -->
+
 ## Components
 
 ### Scene Manager (`scene.lua`)
@@ -175,9 +196,9 @@ local ensure_ninjabrain = P.ensure_java_jar(
 end,
 ```
 
-## Migration from Legacy Config
+## Migration to Waywork
 
-### Before (Legacy)
+### Before
 
 ```lua
 -- Scattered mirror management
