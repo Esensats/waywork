@@ -1,6 +1,6 @@
 # Waywork
 
-A framework for building waywall configurations for Minecraft speedrunning setups on Linux/Wayland.
+A framework for building [waywall](https://github.com/tesselslate/waywall) configurations for Minecraft speedrunning setups on Linux/Wayland.
 
 ## Overview
 
@@ -13,12 +13,14 @@ Waywork provides a structured, modular approach to managing waywall configuratio
 Manages visual elements (mirrors, images, text) uniformly with grouping and lifecycle management.
 
 **Features:**
+
 - **Unified Management**: Handle mirrors, images, and text objects through a single interface
 - **Grouping**: Organize scene objects into logical groups for batch operations
 - **Lazy Loading**: Objects are only created when enabled
 - **Dynamic Updates**: Modify object properties at runtime
 
 **Example:**
+
 ```lua
 local Scene = require("waywork.scene")
 local scene = Scene.SceneManager.new(ww)
@@ -26,9 +28,9 @@ local scene = Scene.SceneManager.new(ww)
 -- Register scene objects
 scene:register("e_counter", {
     kind = "mirror",
-    options = { 
-        src = { x = 1, y = 37, w = 49, h = 9 }, 
-        dst = { x = 1150, y = 300, w = 196, h = 36 } 
+    options = {
+        src = { x = 1, y = 37, w = 49, h = 9 },
+        dst = { x = 1150, y = 300, w = 196, h = 36 }
     },
     groups = { "thin" },
 })
@@ -53,12 +55,14 @@ scene:enable("e_counter", true)
 Orchestrates resolution switching with enter/exit hooks and guard conditions.
 
 **Features:**
+
 - **Resolution Management**: Automatic resolution switching with cleanup
 - **Lifecycle Hooks**: `on_enter` and `on_exit` callbacks for mode transitions
 - **Toggle Guards**: Conditional guards to prevent accidental mode switches (e.g. pressing F3 + F4 to switch gamemode, but accidentally triggering mode transition instead)
 - **State Tracking**: Knows which mode is currently active
 
 **Example:**
+
 ```lua
 local Modes = require("waywork.modes")
 local ModeManager = Modes.ModeManager.new(ww)
@@ -100,6 +104,7 @@ ModeManager:toggle("thin")  -- Switch back to default (0x0)
 Simple utility for building action tables from key mappings.
 
 **Example:**
+
 ```lua
 local Keys = require("waywork.keys")
 
@@ -123,6 +128,7 @@ config.actions = actions
 Low-level utilities used throughout the framework.
 
 **Features:**
+
 - **Toggle**: Boolean state management with callbacks
 - **Resettable Timeout**: Timeout that cancels previous invocations
 - **Table Operations**: Copy and merge utilities
@@ -132,11 +138,13 @@ Low-level utilities used throughout the framework.
 Utilities for managing external processes with shell command handling.
 
 **Features:**
+
 - **Process Detection**: Check if processes are running using `pgrep`
 - **Java JAR Support**: Specialized utilities for launching Java applications
 - **Argument Handling**: Proper handling of command arguments as arrays
 
 **Example:**
+
 ```lua
 local P = require("waywork.processes")
 
@@ -147,7 +155,7 @@ end
 
 -- Create Java JAR launchers with proper argument handling
 local ensure_paceman = P.ensure_java_jar(
-    ww, 
+    ww,
     "/usr/lib/jvm/java-24-openjdk/bin/java",
     "/home/user/apps/paceman-tracker.jar",
     {"--nogui"}  -- arguments as array
@@ -155,7 +163,7 @@ local ensure_paceman = P.ensure_java_jar(
 
 local ensure_ninjabrain = P.ensure_java_jar(
     ww,
-    "/usr/lib/jvm/java-24-openjdk/bin/java", 
+    "/usr/lib/jvm/java-24-openjdk/bin/java",
     "/home/user/apps/ninjabrain-bot.jar",
     {"-Dawt.useSystemAAFontSettings=on"}  -- JVM arguments
 )("ninjabrain-bot\\.jar")  -- process pattern to check
@@ -170,6 +178,7 @@ end,
 ## Migration from Legacy Config
 
 ### Before (Legacy)
+
 ```lua
 -- Scattered mirror management
 local make_mirror = function(options)
@@ -206,6 +215,7 @@ end
 ```
 
 ### After (Waywork)
+
 ```lua
 local Scene = require("waywork.scene")
 local Modes = require("waywork.modes")
