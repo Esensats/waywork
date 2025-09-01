@@ -44,7 +44,7 @@ Manages visual elements (mirrors, images, text) uniformly with grouping and life
 
 ```lua
 local Scene = require("waywork.scene")
-local scene = Scene.SceneManager.new(ww)
+local scene = Scene.SceneManager.new(waywall)
 
 -- Register scene objects
 scene:register("e_counter", {
@@ -86,7 +86,7 @@ Orchestrates resolution switching with enter/exit hooks and guard conditions.
 
 ```lua
 local Modes = require("waywork.modes")
-local ModeManager = Modes.ModeManager.new(ww)
+local ModeManager = Modes.ModeManager.new(waywall)
 
 ModeManager:define("thin", {
     width = 340,
@@ -103,15 +103,15 @@ ModeManager:define("tall", {
     width = 384,
     height = 16384,
     toggle_guard = function()
-        return not ww.get_key("F3")  -- Prevent toggle during F3 debug
+        return not waywall.get_key("F3")  -- Prevent toggle during F3 debug
     end,
     on_enter = function()
         scene:enable_group("tall", true)
-        ww.set_sensitivity(tall_sens)
+        waywall.set_sensitivity(tall_sens)
     end,
     on_exit = function()
         scene:enable_group("tall", false)
-        ww.set_sensitivity(0)
+        waywall.set_sensitivity(0)
     end,
 })
 
@@ -137,7 +137,7 @@ local actions = Keys.actions({
         return ModeManager:toggle("tall")
     end,
     ["Ctrl-E"] = function()
-        ww.press_key("ESC")
+        waywall.press_key("ESC")
     end,
 })
 
@@ -176,14 +176,14 @@ end
 
 -- Create Java JAR launchers with proper argument handling
 local ensure_paceman = P.ensure_java_jar(
-    ww,
+    waywall,
     "/usr/lib/jvm/java-24-openjdk/bin/java",
     "/home/user/apps/paceman-tracker.jar",
     {"--nogui"}  -- arguments as array
 )("paceman-tracker\\.jar*")  -- process pattern to check
 
 local ensure_ninjabrain = P.ensure_java_jar(
-    ww,
+    waywall,
     "/usr/lib/jvm/java-24-openjdk/bin/java",
     "/home/user/apps/ninjabrain-bot.jar",
     {"-Dawt.useSystemAAFontSettings=on"}  -- JVM arguments
@@ -238,12 +238,14 @@ end
 ### After (Waywork)
 
 ```lua
+local waywall = require("waywall")
+
 local Scene = require("waywork.scene")
 local Modes = require("waywork.modes")
 local Keys = require("waywork.keys")
 
-local scene = Scene.SceneManager.new(ww)
-local ModeManager = Modes.ModeManager.new(ww)
+local scene = Scene.SceneManager.new(waywall)
+local ModeManager = Modes.ModeManager.new(waywall)
 
 -- Clean object registration
 scene:register("e_counter", {
