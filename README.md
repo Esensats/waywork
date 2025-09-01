@@ -6,6 +6,10 @@ A framework for building [waywall](https://github.com/tesselslate/waywall) confi
 
 Waywork provides a structured, modular approach to managing waywall configurations. It abstracts common patterns like resolution switching, scene management, and process orchestration into reusable components, making waywall configs more maintainable and easier to understand.
 
+## Example config
+
+For reference you can look at my config which uses waywork here: [Esensats/waywall-config](https://github.com/Esensats/waywall-config)
+
 ## Table of Contents
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=2 depthTo=6 orderedList=false} -->
@@ -13,6 +17,7 @@ Waywork provides a structured, modular approach to managing waywall configuratio
 <!-- code_chunk_output -->
 
 - [Overview](#overview)
+- [Example config](#example-config)
 - [Table of Contents](#table-of-contents)
 - [Components](#components)
   - [Scene Manager (`scene.lua`)](#scene-manager-scenelua)
