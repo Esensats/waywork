@@ -10,6 +10,14 @@ Waywork provides a structured, modular approach to managing waywall configuratio
 
 For reference you can look at my config which uses waywork here: [Esensats/waywall-config](https://github.com/Esensats/waywall-config)
 
+## Installation
+
+Clone the repository into your waywall configuration directory:
+```sh
+# For example:
+git clone --depth 1 https://github.com/Esensats/waywork ~/.config/waywall/waywork
+```
+
 ## Table of Contents
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=2 depthTo=6 orderedList=false} -->
@@ -18,6 +26,7 @@ For reference you can look at my config which uses waywork here: [Esensats/waywa
 
 - [Overview](#overview)
 - [Example config](#example-config)
+- [Installation](#installation)
 - [Table of Contents](#table-of-contents)
 - [Components](#components)
   - [Scene Manager (`scene.lua`)](#scene-manager-scenelua)
